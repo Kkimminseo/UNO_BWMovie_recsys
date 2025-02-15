@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    # RESTful한 API를 지원해주는 framework
+    'rest_framework',
+    
     # Created App List
     'accounts', # 회원 기능 app
 ]
