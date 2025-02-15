@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 # accounts/models.py.User
 User = get_user_model()
 
-class UserRegistartionSerializer(serializers.ModelSerializer):
+class UserSignUpSerializer(serializers.ModelSerializer):
     # 비밀번호 재확인
     # write_only=True : 필수 요소
     password2 = serializers.CharField(write_only=True)
