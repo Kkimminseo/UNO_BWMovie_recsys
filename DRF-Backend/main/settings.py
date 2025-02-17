@@ -48,10 +48,17 @@ INSTALLED_APPS = [
 
 # Rest Framework 설정하기
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # 인증된 사용자만 접근 가능
+    ],
+    
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication', # JWT 인증
     ],
 }
+
+# JWT 토큰 관련 설정
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
