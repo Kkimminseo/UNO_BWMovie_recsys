@@ -38,4 +38,13 @@ class LogInView(generics.GenericAPIView):
             
 # 로그아웃 view
 class LogOutView(generics.GenericAPIView):
-    pass
+    permission_classes = [permissions.IsAuthenticated] # 로그인된 사람만 접근 가능
+    
+    def post(self, request):
+        try:
+            Refresh_token = request.data['refresh_token']
+            token = RefreshToken(Refresh_token)
+            token.blacklist() # 토큰을 블랙 리스트에 추가하여 해당 토큰이 더 이상 유효하지 않도록 함
+            return Response({"message" : "로그아웃되었습니다."}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({"error" : str(e)}, status=status.HTTP_400_BAD_REQUEST)
