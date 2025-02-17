@@ -42,7 +42,7 @@ class LogOutView(generics.GenericAPIView):
     
     def post(self, request):
         try:
-            Refresh_token = request.data['refresh_token']
+            Refresh_token = request.data['refresh']
             token = RefreshToken(Refresh_token)
             token.blacklist() # 토큰을 블랙 리스트에 추가하여 해당 토큰이 더 이상 유효하지 않도록 함
             return Response({"message" : "로그아웃되었습니다."}, status=status.HTTP_205_RESET_CONTENT)
