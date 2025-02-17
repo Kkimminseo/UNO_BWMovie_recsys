@@ -1,10 +1,11 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 
 # settings.py에 선언했던 AUTH_USER_MODEL 데려옴
 # accounts/models.py.User
 User = get_user_model()
 
+# 회원 가입 serializer
 class UserSignUpSerializer(serializers.ModelSerializer):
     # 비밀번호 재확인
     # write_only=True : 필수 요소
@@ -41,3 +42,15 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+    
+# 로그인 serializer
+class UserLogInSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+    password = serializers.CharField(required=True, write_only=True)
+   
+    def validate(self, data):
+        user = authenticate(username=data['username'], password=data['password']) # authenticate()로 사용자 인증 수행
+        if user is None: # 만약 user가 None이라면
+            raise serializers.ValidationError("아이디 또는 비밀번호가 일치하지 않습니다.") # Error 메시지 보여주기
+        data['user'] = user # user 정보를 validated_data에 저장
+        return data
