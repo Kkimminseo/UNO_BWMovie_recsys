@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     
     # RESTful한 API를 지원해주는 framework
     'rest_framework',
+    # blacklist
+    'rest_framework_simplejwt.token_blacklist',
     
     # Created App List
     'accounts', # 회원 기능 app
@@ -62,6 +64,8 @@ from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # access token 유효 기간
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # refresh token 유효 기간
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
 }
 
 MIDDLEWARE = [
