@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     
     # RESTful한 API를 지원해주는 framework
     'rest_framework',
+    # blacklist
+    'rest_framework_simplejwt.token_blacklist',
     
     # Created App List
     'accounts', # 회원 기능 app
