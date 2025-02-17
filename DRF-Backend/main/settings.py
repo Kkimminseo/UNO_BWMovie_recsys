@@ -57,8 +57,12 @@ REST_FRAMEWORK = {
     ],
 }
 
+from datetime import timedelta
 # JWT 토큰 관련 설정
-
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # access token 유효 기간
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # refresh token 유효 기간
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
