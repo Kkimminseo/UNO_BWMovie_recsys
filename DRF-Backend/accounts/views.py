@@ -17,6 +17,7 @@ User = get_user_model()
 class SignUpView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSignUpSerializer
+    permission_classes = [permissions.AllowAny]  # 모든 사용자가 접근 가능하도록 설정
 
 # 로그인 view
 class LogInView(generics.GenericAPIView):
