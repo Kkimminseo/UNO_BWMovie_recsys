@@ -27,8 +27,6 @@ import sys
 # 프로젝트 루트를 sys.path에 추가하여 import 문제를 방지합니다.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-// ... existing code ...
-
 import os
 import sys
 
