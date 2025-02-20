@@ -17,17 +17,12 @@
    - 프로젝트 루트에 'dataset' 폴더 생성
    - 'dataset' 폴더에 'revised_df.csv' 파일 위치
 
-4. 스크립트 실행:
+4. 데이터베이스 마이그레이션:
+    python manage.py migrate
+
+5. 스크립트 실행:
    python -m movies.import_movies
 """
-
-import os
-import sys
-
-# 프로젝트 루트를 sys.path에 추가하여 import 문제를 방지합니다.
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-// ... existing code ...
 
 import os
 import sys
