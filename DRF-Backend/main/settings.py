@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     # Created App List
     "accounts",  # 회원 기능 app
     "chats",  # 채팅 기능 app
+    "corsheaders",  # CORS 설정
 ]
 
 # Rest Framework 설정하기
@@ -74,6 +75,7 @@ SIMPLE_JWT = {
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # CORS 미들웨어 (반드시 CommonMiddleware 앞에 위치해야 함)
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -155,3 +157,19 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# CORS 설정
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React 개발 서버
+]
+
+CORS_ALLOW_CREDENTIALS = True  # 쿠키 허용
+
+# CSRF 설정
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",  # React 개발 서버
+]
+
+# 세션 설정
+SESSION_COOKIE_SAMESITE = "Lax"  # 또는 'None' (HTTPS가 필요함)
+SESSION_COOKIE_SECURE = False  # 개발 환경에서는 False, 프로덕션에서는 True로 설정
