@@ -1,24 +1,23 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
+from django.conf import settings
 from .serializers import ChatSerializer
 from rest_framework.permissions import AllowAny
 import openai
 
 
-# Create your views here.
 class ChatAPIView(generics.CreateAPIView):
     serializer_class = ChatSerializer
     permission_classes = [AllowAny]
 
-    def create(self, request, *args, **kwargs):  # 채팅 생성
-        serializer = self.get_serializer(
-            data=request.data
-        )  # 유저입력한 데이터를 시리얼라이저에 저장
-        serializer.is_valid(raise_exception=True)  # 유효성 검사
-        user_message = serializer.validated_data.get("message")  # 유저가 입력한 메시지
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_message = serializer.validated_data.get("message")
 
-        try:  # GPT-3.5 turbo 모델을 사용하여 채팅 생성
+        try:
+            openai.api_key = settings.OPENAI_API_KEY
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -30,11 +29,10 @@ class ChatAPIView(generics.CreateAPIView):
                 ],
             )
             chat_response = response.choices[0].message["content"]
+            return Response({"message": chat_response}, status=status.HTTP_200_OK)
+
+        except Exception as e:
             return Response(
-                {"message": chat_response}, status=status.HTTP_200_OK
-            )  # 채팅 응답 반환
-        except Exception:
-            return Response(
-                {"message": "An error occurred while processing your request."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )  # 에러 발생시 반환
+                {"error": f"요청 처리 중 오류가 발생했습니다: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
