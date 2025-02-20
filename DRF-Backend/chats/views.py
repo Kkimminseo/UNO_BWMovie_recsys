@@ -3,13 +3,13 @@ from rest_framework import status
 from rest_framework import generics
 from django.conf import settings
 from .serializers import ChatSerializer
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 import openai
 
 
 class ChatAPIView(generics.CreateAPIView):
     serializer_class = ChatSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -17,6 +17,9 @@ class ChatAPIView(generics.CreateAPIView):
         user_message = serializer.validated_data.get("message")
 
         try:
+            # 채팅 메시지 저장
+            chat = serializer.save(user=request.user)
+
             openai.api_key = settings.OPENAI_API_KEY
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",

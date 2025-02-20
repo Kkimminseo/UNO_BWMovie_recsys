@@ -1,3 +1,4 @@
+import axios from 'axios';
 import axiosInstance from './axios';
 
 // 회원가입 API
@@ -7,6 +8,26 @@ export const signup = async (userData) => {
     return response.data;
   } catch (error) {
     throw error.response.data;
+  }
+};
+
+// 토큰 갱신 API
+export const refreshToken = async () => {
+  try {
+    const refresh = localStorage.getItem('refresh_token');
+    if (!refresh) throw new Error('No refresh token');
+
+    const response = await axios.post('http://localhost:8000/api/v1/account/token/refresh/', {
+      refresh: refresh
+    });
+    
+    const { access } = response.data;
+    localStorage.setItem('access_token', access);
+    return access;
+  } catch (error) {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    throw error;
   }
 };
 
@@ -27,12 +48,13 @@ export const login = async (credentials) => {
 // 로그아웃 API
 export const logout = async () => {
   try {
-    const refresh_token = localStorage.getItem('refresh_token');
-    await axiosInstance.post('/account/logout/', { refresh: refresh_token });
-    // 로컬 스토리지 토큰 제거
+    const refresh = localStorage.getItem('refresh_token');
+    await axiosInstance.post('/account/logout/', { refresh });
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
   } catch (error) {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     throw error.response.data;
   }
 }; 
