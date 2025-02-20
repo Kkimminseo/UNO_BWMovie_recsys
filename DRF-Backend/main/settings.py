@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     # Created App List
     "accounts",  # 회원 기능 app
     "chats",  # 채팅 기능 app
+    "movies",  # 영화 정보 app
 ]
 
 # Rest Framework 설정하기
