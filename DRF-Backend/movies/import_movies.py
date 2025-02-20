@@ -10,7 +10,7 @@ import django
 
 django.setup()
 
-from movies.models import Movie
+from movies.models import Genre
 
 import csv
 from datetime import datetime
@@ -20,21 +20,11 @@ def import_movies(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
         reader = csv.DictReader(file)
         for row in reader:
-            Movie.objects.create(
-                id=row["id"],
-                title=row["title"],
-                revenue=row["revenue"],
-                vote_average=row["vote_average"],
-                imdb_id=row["imdb_id"],
-                original_title=row["original_title"],
-                overview=row["overview"],
-                popularity=row["popularity"],
-                genres=row["genres"],
-                poster_path=row["poster_path"],
-                keywords=row["keywords"],
+            Genre.objects.create(
+                genre_name=row["genre"],
             )
 
 
 if __name__ == "__main__":
-    csv_file_path = "/Users/yongsu/UNO_BWMovie_recsys/dataset/revised_df.csv"
+    csv_file_path = "/Users/yongsu/UNO_BWMovie_recsys/dataset/genres.csv"
     import_movies(csv_file_path)
