@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -36,6 +36,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -87,7 +89,8 @@ ROOT_URLCONF = "main.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'templates'),
+                 os.path.join(BASE_DIR, 'chats', 'templates'),],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -101,8 +104,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "main.wsgi.application"
+ASGI_APPLICATION = 'main.asgi.application'
 
-
+CHANNEL_LAYERS = {
+    'default' : {
+        'BACKEND' : 'channels_redis.core.RedisChannelLayer',
+        'CONFIG' : {
+            'hosts' : [('127.0.0.1', 6379)]
+        }
+    }
+}
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 

@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import ChatAPIView
+from .views import chat_page
 
 urlpatterns = [
-    path("", ChatAPIView.as_view(), name="chat"),
+    path("", chat_page, name="chat_page"),
 ]
