@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from .serializers import SignUpMovieListSerializer
+from .serializers import SignupMovieListSerializer
 from rest_framework.decorators import api_view
 import pandas as pd
 
@@ -23,7 +23,7 @@ def SignUpMovieListView(request):
     data = sampled_df[['original_title', 'poster_url']].to_dict(orient='records')
 
     """serializer를 사용하여 데이터 변환 및 유효성 검사"""
-    serializer = SignUpMovieListSerializer(data=data, many=True)
+    serializer = SignupMovieListSerializer(data=data, many=True)
     if serializer.is_valid():
         return Response(serializer.data)
     return Response(serializer.errors, status=400) # 에러 처리
