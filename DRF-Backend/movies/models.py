@@ -1,7 +1,14 @@
 from django.db import models
+from accounts.models import User
+from enum import Enum
+
+"""Enum용 모델"""
+class PerformEumsType(Enum):
+    like = "like"
+    dislike = "dislike"
 
 
-# Create your models here.
+"""Movie model"""
 class Movie(models.Model):
     id = models.IntegerField(primary_key=True)  # TMDB ID(기존 데이터셋의 ID)
     title = models.CharField(max_length=100)  # 제목
@@ -17,3 +24,15 @@ class Movie(models.Model):
 
     def __str__(self):
         return self.title
+
+
+"""영화 선호도 정리를 위한 model"""
+class MoviePreference(models.Model):
+    user_id_fk = models.ForeignKey(User, on_delete=models.CASCADE)# FK "유저 ID"
+    movie_id_fk = models.ForeignKey(Movie, on_delete=models.CASCADE) # FK "영화 ID"
+    preference_type = models.CharField(
+        max_length=50, performenumtype = [(tag.value, tag.name) for tag in PerformEumsType], default=PerformEumsType.dislike.value
+        ) #"선호도 유형 (ENUM: like, dislike)"
+    # PRIMARY KEY "(user_id_fk, movie_id_fk)"
+
+
