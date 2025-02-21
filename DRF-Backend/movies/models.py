@@ -31,8 +31,9 @@ class MoviePreference(models.Model):
     user_id_fk = models.ForeignKey(User, on_delete=models.CASCADE)# FK "유저 ID"
     movie_id_fk = models.ForeignKey(Movie, on_delete=models.CASCADE) # FK "영화 ID"
     preference_type = models.CharField(
-        max_length=50, performenumtype = [(tag.value, tag.name) for tag in PerformEumsType], default=PerformEumsType.dislike.value
-        ) #"선호도 유형 (ENUM: like, dislike)"
+        max_length=50,
+        choices=[(tag.value, tag.name) for tag in PerformEumsType],
+        default=PerformEumsType.dislike.value) #"선호도 유형 (ENUM: like, dislike)"
     # PRIMARY KEY "(user_id_fk, movie_id_fk)"
 
 
