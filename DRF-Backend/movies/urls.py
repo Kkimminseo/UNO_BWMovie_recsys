@@ -2,6 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('movielist/', views.SignUpMovieListView), # Signup movie list로 가기
-    path('genrepreference/<int:genre_id>/', views.CreateGenrePreferenceView) # 선호 장르 생성
+    path('movielist/', views.SignUpMovieListView.as_view()), # Signup movie list로 가기
+    path('genrepreference/', views.CreateGenrePreferenceView.as_view()), # 선호 장르 생성
 ]
