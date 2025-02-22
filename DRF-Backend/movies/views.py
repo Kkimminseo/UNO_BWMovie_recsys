@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from .serializers import SignupMovieListSerializer
+from .serializers import SignupMovieListSerializer, GenreSerializer
 from rest_framework.decorators import api_view
 import pandas as pd
 
@@ -11,8 +11,7 @@ def SignUpMovieListView(request):
     
     """csv 불러 오기"""
     df = pd.read_csv(
-        '/Users/baeminkyung/Desktop/github/UNO_BWMovie_recsys/dataset/signup_movie_list.csv'
-        )
+        '/Users/baeminkyung/Desktop/github/UNO_BWMovie_recsys/dataset/signup_movie_list.csv')
     
     """100개의 original_title, poster_path 열 중에서 25개 랜덤으로 데리고 옴"""
     sampled_df = df.sample(n=25)[['original_title', 'poster_path']]
@@ -27,3 +26,6 @@ def SignUpMovieListView(request):
     if serializer.is_valid():
         return Response(serializer.data)
     return Response(serializer.errors, status=400) # 에러 처리
+
+
+
