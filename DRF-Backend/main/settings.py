@@ -109,6 +109,9 @@ TEMPLATES = [
     },
 ]
 
+# csv file 경로 설정
+CSV_FILE_PATH = os.path.join(BASE_DIR, 'dataset')
+
 WSGI_APPLICATION = "main.wsgi.application"
 
 
