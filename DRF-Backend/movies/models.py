@@ -7,6 +7,14 @@ class PerformEumsType(Enum):
     like = "like"
     dislike = "dislike"
 
+"""Genres model"""
+class Genre(models.Model):
+    id = models.AutoField(primary_key=True) # 장르 ID (AutoField)
+    genre = models.CharField(max_length=100) # 장르 이름 (CharField)
+ 
+    def __str__(self):
+        return self.genre
+
 
 """Movie model"""
 class Movie(models.Model):
@@ -18,7 +26,8 @@ class Movie(models.Model):
     original_title = models.CharField(max_length=100)  # 원제(개봉국가제목)
     overview = models.TextField(default="")  # 줄거리
     popularity = models.FloatField(default=0.0)  # 인기도
-    genres = models.CharField(max_length=100, default="")  # 장르
+    """genres : CharField에서 ManyToManyField로 변경"""
+    genres = models.ManyToManyField(Genre, related_name="movies")  # 장르
     poster_path = models.CharField(max_length=100, default="")  # 포스터 경로(url)
     keywords = models.CharField(max_length=100, default="")  # 키워드
 
@@ -35,5 +44,3 @@ class MoviePreference(models.Model):
         choices=[(tag.value, tag.name) for tag in PerformEumsType],
         default=PerformEumsType.dislike.value) #"선호도 유형 (ENUM: like, dislike)"
     # PRIMARY KEY "(user_id_fk, movie_id_fk)"
-
-
