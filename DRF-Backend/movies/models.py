@@ -1,11 +1,5 @@
 from django.db import models
 from accounts.models import User
-from enum import Enum
-
-"""Enum용 모델"""
-class PerformEumsType(Enum):
-    like = "like"
-    dislike = "dislike"
 
 """Genres model"""
 class Genre(models.Model):
@@ -37,10 +31,33 @@ class Movie(models.Model):
 
 """영화 선호도 정리를 위한 model"""
 class MoviePreference(models.Model):
-    user_id_fk = models.ForeignKey(User, on_delete=models.CASCADE)# FK "유저 ID"
-    movie_id_fk = models.ForeignKey(Movie, on_delete=models.CASCADE) # FK "영화 ID"
+    user_id_fk = models.ForeignKey(User, on_delete=models.CASCADE, related_name='genre_preference')# FK "유저 ID"
+    movie_id_fk = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='movie_preference') # FK "영화 ID"
     preference_type = models.CharField(
-        max_length=50,
-        choices=[(tag.value, tag.name) for tag in PerformEumsType],
-        default=PerformEumsType.dislike.value) #"선호도 유형 (ENUM: like, dislike)"
-    # PRIMARY KEY "(user_id_fk, movie_id_fk)"
+        max_length=10,
+        choices=[('like', 'Like'), ('dislike', 'Dislike')],
+        default='dislike') # 선호도 유형 like, dislike
+
+    """데이터베이스 내에서 고유하도록 강제하여, 복합 primary key rngus"""
+    class Meta:
+        unique_together = ('user_id_fk', 'movie_id_fk')
+        
+    def __str__(self):
+        return f"{self.user_id_fk} liked/disliked {self.movie_id_fk}."
+    
+
+"""장르 선호도 정리를 위한 model"""
+class GenrePreference(models.Model):
+    user_id_fk = models.ForeignKey(User, on_delete=models.CASCADE) # FK 유저 ID
+    genre_id_fk = models.ForeignKey(Genre, on_delete=models.CASCADE) # FK 장르 ID
+    preference_type = models.CharField(
+        max_length=10,
+        choices=[('like', 'Like'), ('dislike', 'Dislike')],
+        default='dislike') # 선호도 유형 like, dislike
+    
+    """데이터베이스 내에서 고유하도록 강제하여, 복합 primary key와 같은 역할을 함"""
+    class Meta:
+        unique_together = ('user_id_fk', 'genre_id_fk')
+        
+    def __str__(self):
+        return f"{self.user_id_fk} liked/disliked {self.genre_id_fk}."
