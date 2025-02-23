@@ -12,7 +12,7 @@ class Genre(models.Model):
 
 """Movie model"""
 class Movie(models.Model):
-    id = models.IntegerField(primary_key=True)  # TMDB ID(기존 데이터셋의 ID)
+    id = models.CharField(max_length=100, primary_key=True)  # TMDB ID(기존 데이터셋의 ID)
     title = models.CharField(max_length=100)  # 제목
     revenue = models.IntegerField(default=0)  # 수익
     vote_average = models.FloatField(default=0.0)  # 평점
