@@ -1,13 +1,29 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status,permissions
+import random
 
 from .models import GenrePreference, MoviePreference, Movie
-
+from .serializers import SignupMovieListSerializer
 
 """랜덤한 영화 리스트 25개 보여주는 코드"""
 class SignUpMovieListView(APIView):
-    queryset = Movie.objects.all()
+
+    def get(self, request):
+        # 평점 내림차순으로 정렬하고 수익이 3억 달러 이상인 영화 100개 필터링
+        top_movies = Movie.objects.filter(revenue__gte=300000000).order_by(
+        "-vote_average")[:100]  # 수익이 3억 달러 이상인 영화 중 상위 100개 선택
+
+        # 100개 중 랜덤으로 25개 선택
+        random_movies = list(top_movies)  # 쿼리셋을 리스트로 변환
+        random_selection = random.sample(
+            random_movies, min(25, len(random_movies))
+        )  # 랜덤으로 25개 영화 선택
+
+        # 선택된 영화들을 직렬화
+        serializer = SignupMovieListSerializer(random_selection, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 """선호하는 영화 저장하기"""
