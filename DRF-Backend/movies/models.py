@@ -20,8 +20,7 @@ class Movie(models.Model):
     original_title = models.CharField(max_length=100)  # 원제(개봉국가제목)
     overview = models.TextField(default="")  # 줄거리
     popularity = models.FloatField(default=0.0)  # 인기도
-    """genres : CharField에서 ManyToManyField로 변경"""
-    genres = models.ManyToManyField(Genre, related_name="movies")  # 장르
+    genres = models.CharField(max_length=100, default="")  # 장르
     poster_path = models.CharField(max_length=100, default="")  # 포스터 경로(url)
     keywords = models.CharField(max_length=100, default="")  # 키워드
 
@@ -49,15 +48,11 @@ class MoviePreference(models.Model):
 """장르 선호도 정리를 위한 model"""
 class GenrePreference(models.Model):
     user_id_fk = models.ForeignKey(User, on_delete=models.CASCADE) # FK 유저 ID
-    genre_id_fk = models.ForeignKey(Genre, on_delete=models.CASCADE) # FK 장르 ID
+    genre_id = models.CharField(max_length=100, default="", unique=True)
     preference_type = models.CharField(
         max_length=10,
         choices=[('like', 'Like'), ('dislike', 'Dislike')],
         default='dislike') # 선호도 유형 like, dislike
-    
-    """데이터베이스 내에서 고유하도록 강제하여, 복합 primary key와 같은 역할을 함"""
-    class Meta:
-        unique_together = ('user_id_fk', 'genre_id_fk')
         
     def __str__(self):
         return f"{self.user_id_fk} liked/disliked {self.genre_id_fk}."
