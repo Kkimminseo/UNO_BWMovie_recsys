@@ -165,6 +165,12 @@ const ChatPage = () => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
+    // 초기 안내 메시지 추가
+    setMessages([{
+      text: "안녕하세요! 어떤영화를 추천해드릴까요?",
+      isUser: false
+    }]);
+
     console.log("🔍 WebSocket 연결 시도...");
     const ws = new WebSocket("ws://localhost:8000/ws/chat/");
 
