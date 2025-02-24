@@ -7,6 +7,7 @@ import ChatPage from './pages/ChatPage';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import { useAuth } from './contexts/AuthContext';
+import MoviePreferencePage from './pages/MoviePreferencePage';
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth();
@@ -32,6 +33,14 @@ const AppRoutes = () => {
               <ChatPage />
             </PrivateRoute>
           }
+        />
+        <Route 
+          path="/preferences" 
+          element={
+            <PrivateRoute>
+              <MoviePreferencePage />
+            </PrivateRoute>
+          } 
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
