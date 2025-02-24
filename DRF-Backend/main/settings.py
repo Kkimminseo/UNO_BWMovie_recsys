@@ -14,12 +14,19 @@ from pathlib import Path
 from .config import DJANGO_SECRET_KEY
 from dotenv import load_dotenv
 import os
+import openai
 
+# .env 파일 로드
 load_dotenv()
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# OpenAI API 키 설정
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+if not OPENAI_API_KEY:
+    print("경고: OPENAI_API_KEY가 설정되지 않았습니다!")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -79,6 +86,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",  # CORS 미들웨어 (반드시 CommonMiddleware 앞에 위치해야 함)
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # CORS 미들웨어 (반드시 CommonMiddleware 앞에 위치해야 함)
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
