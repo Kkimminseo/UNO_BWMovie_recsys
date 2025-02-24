@@ -3,9 +3,8 @@ import openai
 import logging
 import numpy as np
 from channels.generic.websocket import AsyncWebsocketConsumer
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
 import asyncio
 import os
 from dotenv import load_dotenv
@@ -29,7 +28,10 @@ vectorstore = FAISS.load_local(
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         """WebSocket 연결 요청이 오면 실행"""
-        await self.accept()  # ✅ WebSocket 연결 승인
+        print('WebSocket 연결 시도')
+        await self.accept()
+        print("✅ WebSocket 연결 성공!")  # ✅ 연결 로그 추가
+
 
     async def disconnect(self, close_code):
         """WebSocket 연결 해제 시 실행"""
@@ -41,19 +43,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
             data = json.loads(text_data)
             user_message = data["message"]
 
-            # 선호 장르 DB에서 가져와야함
-            preferred_gerne = 'action'
+            print(f"📩 받은 메시지: {user_message}")  # ✅ 로그 추가
+
+            # 선호 장르 (DB에서 가져와야 함)
+            preferred_genre = "action"
 
             # FAISS를 활용한 벡터 검색
-            search_results = await self.genre_weighted_mmr_search(user_message, preferred_gerne)
+            search_results = await self.genre_weighted_mmr_search(user_message, preferred_genre)
             
-            # ✅ OpenAI GPT-4o API 호출
+            # GPT-4o API 호출
             gpt_response = await self.get_movie_recommendation(user_message, search_results)
 
-            # ✅ WebSocket으로 GPT-4o의 응답 전송
-            await self.send(text_data=json.dumps({"response": gpt_response}))
+            # ✅ 응답 JSON 구조 로그 추가
+            response_data = {"response": gpt_response}
+            print(f"📤 WebSocket 응답: {response_data}")  
+
+            # WebSocket으로 응답 전송
+            await self.send(text_data=json.dumps(response_data))
         except Exception as e:
+            print(f"❌ 오류 발생: {str(e)}")  # ✅ 오류 로그 추가
             await self.send(text_data=json.dumps({'response': '서버 오류 발생'}))
+
 
     async def genre_weighted_mmr_search(self, query, preferred_genre, k = 20):
         '''MMR 기반 FAISS 검색 + 선호 장르 필터링'''

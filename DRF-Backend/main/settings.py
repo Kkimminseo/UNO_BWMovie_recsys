@@ -18,7 +18,7 @@ import os
 load_dotenv()
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 # Quick-start development settings - unsuitable for production
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "accounts",  # 회원 기능 app
     "chats",  # 채팅 기능 app
     "movies",  # 영화 정보 app
+    "corsheaders", # CORS 설정
 ]
 
 # Rest Framework 설정하기
@@ -75,6 +76,7 @@ SIMPLE_JWT = {
 }
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # CORS 미들웨어 (반드시 CommonMiddleware 앞에 위치해야 함)
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -89,8 +91,7 @@ ROOT_URLCONF = "main.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, 'templates'),
-                 os.path.join(BASE_DIR, 'chats', 'templates'),],
+        "DIRS": [BASE_DIR / '../react-frontend/public'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -120,7 +121,7 @@ CHANNEL_LAYERS = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",  # ✅ Path 객체이므로 '/' 사용 가능!
     }
 }
 
@@ -167,3 +168,24 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CSRF_COOKIE_NAME = "csrftoken"
+CSRF_COOKIE_HTTPONLY = False  # ✅ React에서 쿠키를 읽을 수 있도록 변경
+CSRF_COOKIE_SECURE = False  # ✅ HTTPS가 아니라도 쿠키 설정 가능
+CSRF_USE_SESSIONS = False
+CORS_ALLOW_CREDENTIALS = True  # ✅ 인증된 요청 허용
+
+# CORS 및 CSRF 설정 추가
+CORS_ALLOW_ALL_ORIGINS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
+# 세션 설정
+SESSION_COOKIE_SAMESITE = "Lax"  # 또는 'None' (HTTPS가 필요함)
+SESSION_COOKIE_SECURE = False  # 개발 환경에서는 False, 프로덕션에서는 True로 설정

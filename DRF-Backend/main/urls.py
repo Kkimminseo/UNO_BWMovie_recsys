@@ -21,5 +21,5 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/account/", include("accounts.urls")),  # accounts의 url 불러 쓰기
-    path("v1/chat/", include("chats.urls")),  # chats의 url 불러 쓰기
+    path("api/v1/chat/", include("chats.urls")),  # chats의 url 불러 쓰기
 ]
