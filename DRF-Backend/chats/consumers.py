@@ -6,10 +6,17 @@ import logging
 from dotenv import load_dotenv
 from django.conf import settings
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
+from django.contrib.auth import get_user_model
+from movies.models import Movie, Genre, MoviePreference, GenrePreference
+from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.exceptions import TokenError
+
+User = get_user_model()
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -38,8 +45,54 @@ llm = ChatOpenAI(model="gpt-4o")
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    @database_sync_to_async
+    def get_user_from_token(self, token_string):
+        try:
+            # 토큰 검증
+            access_token = AccessToken(token_string)
+            user_id = access_token.payload.get("user_id")
+
+            # 사용자 조회
+            return User.objects.get(id=user_id)
+        except (TokenError, User.DoesNotExist) as e:
+            logger.error(f"토큰 검증 실패: {str(e)}")
+            return None
+
     async def connect(self):
+        # URL 쿼리 파라미터에서 토큰 추출
+        query_string = self.scope.get("query_string", b"").decode()
+        token = dict(pair.split("=") for pair in query_string.split("&") if pair).get(
+            "token"
+        )
+
+        if not token:
+            logger.error("❌ 토큰이 없습니다.")
+            await self.close()
+            return
+
+        # 토큰으로 사용자 인증
+        self.user = await self.get_user_from_token(token)
+        if not self.user:
+            logger.error("❌ 유효하지 않은 토큰입니다.")
+            await self.close()
+            return
+
         await self.accept()
+        logger.info(f"✅ 사용자 {self.user.username} 연결됨")
+
+    @database_sync_to_async
+    def get_user_preferences(self):
+        # 사용자가 좋아하는 장르 조회
+        genre_preferences = GenrePreference.objects.filter(
+            user_id_fk=self.user, preference_type="like"
+        ).values_list("genre_id", flat=True)
+
+        # 사용자가 좋아하는 영화 조회
+        movie_preferences = MoviePreference.objects.filter(
+            user_id_fk=self.user, preference_type="like"
+        ).values_list("movie_id_fk__title", flat=True)
+
+        return list(genre_preferences), list(movie_preferences)
 
     async def disconnect(self, close_code):
         pass
@@ -47,8 +100,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         question = data.get("message", "")
-        preferred_genres = data.get("preferred_genres", [])
-        preferred_movies = data.get("preferred_movies", [])
+
+        # 사용자의 선호도 정보 조회
+        preferred_genres, preferred_movies = await self.get_user_preferences()
 
         if not question:
             await self.send(text_data=json.dumps({"error": "질문이 없습니다."}))

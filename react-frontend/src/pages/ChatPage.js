@@ -4,7 +4,7 @@ import SmartToyIcon from '@mui/icons-material/SmartToy';
 import SendIcon from '@mui/icons-material/Send';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
-import { getUserPreferences } from '../api/user';
+import { getAccessToken } from '../api/auth';  // 인증 토큰 가져오기
 
 const Container = styled.div`
   max-width: 800px;
@@ -188,30 +188,25 @@ const ChatPage = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [playingAudio, setPlayingAudio] = useState(null);
-  const [userPreferences, setUserPreferences] = useState({
-    preferred_genres: [],
-    preferred_movies: []
-  });
   const chatContainerRef = useRef(null);
   const [socket, setSocket] = useState(null);
   const audioRefs = useRef({});
-  const BACKEND_URL = 'http://localhost:8000';  // 백엔드 서버 URL 추가
+  const BACKEND_URL = 'http://localhost:8000';
 
   useEffect(() => {
-    const loadUserPreferences = async () => {
-      const preferences = await getUserPreferences();
-      setUserPreferences(preferences);
-    };
-
-    loadUserPreferences();
-    
     setMessages([{
       text: "안녕하세요! 어떤영화를 추천해드릴까요?",
       isUser: false
     }]);
 
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      console.error("❌ 인증 토큰이 없습니다.");
+      return;
+    }
+
     console.log("🔍 WebSocket 연결 시도...");
-    const ws = new WebSocket("ws://localhost:8000/ws/chat/");
+    const ws = new WebSocket(`ws://localhost:8000/ws/chat/?token=${accessToken}`);
 
     ws.onopen = () => {
       console.log("✅ WebSocket 연결 성공!");
@@ -317,8 +312,6 @@ const ChatPage = () => {
     
     const messageData = {
       message: inputMessage,
-      preferred_genres: userPreferences.preferred_genres,
-      preferred_movies: userPreferences.preferred_movies
     };
     
     socket.send(JSON.stringify(messageData));

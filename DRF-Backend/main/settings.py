@@ -38,7 +38,7 @@ SECRET_KEY = DJANGO_SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
 
 
 # Application definition
@@ -84,10 +84,9 @@ SIMPLE_JWT = {
 }
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",  # CORS 미들웨어 (반드시 CommonMiddleware 앞에 위치해야 함)
+    "corsheaders.middleware.CorsMiddleware",  # CORS 미들웨어 (반드시 CommonMiddleware 앞에 위치)
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",  # CORS 미들웨어 (반드시 CommonMiddleware 앞에 위치해야 함)
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -189,10 +188,22 @@ CSRF_COOKIE_NAME = "csrftoken"
 CSRF_COOKIE_HTTPONLY = False  # ✅ React에서 쿠키를 읽을 수 있도록 변경
 CSRF_COOKIE_SECURE = False  # ✅ HTTPS가 아니라도 쿠키 설정 가능
 CSRF_USE_SESSIONS = False
-CORS_ALLOW_CREDENTIALS = True  # ✅ 인증된 요청 허용
+CORS_ALLOW_CREDENTIALS = True
 
-# CORS 및 CSRF 설정 추가
+# CORS 및 CSRF 설정
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+# WebSocket 설정
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://localhost:\d+$",
+    r"^http://127.0.0.1:\d+$",
+]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
@@ -200,7 +211,6 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
-SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 # 세션 설정
 SESSION_COOKIE_SAMESITE = "Lax"  # 또는 'None' (HTTPS가 필요함)
