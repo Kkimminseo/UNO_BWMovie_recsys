@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
-import { sendMessage } from '../api/chat';
 
 const Container = styled.div`
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
-  height: calc(100vh - 64px); // 네비게이션 바 높이 제외
+  height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
 `;
@@ -107,6 +106,40 @@ const ChatPage = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef(null);
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    console.log("🔍 WebSocket 연결 시도...");
+    const ws = new WebSocket("ws://localhost:8000/ws/chat/");
+
+    ws.onopen = () => {
+      console.log("✅ WebSocket 연결 성공!");
+    };
+
+    ws.onmessage = (event) => {
+      console.log("📩 받은 메시지:", event.data);
+      try {
+        const data = JSON.parse(event.data);
+        setMessages((prev) => [...prev, { text: data.response, isUser: false }]);
+      } catch (error) {
+        console.error("❌ WebSocket 메시지 JSON 파싱 오류:", error);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error("❌ WebSocket 오류 발생:", error);
+    };
+
+    ws.onclose = () => {
+      console.log("❌ WebSocket 연결 종료");
+    };
+
+    setSocket(ws);
+
+    return () => {
+      ws.close();
+    };
+  }, []);
 
   // 새 메시지가 추가될 때마다 스크롤을 맨 아래로 이동
   useEffect(() => {
@@ -115,10 +148,10 @@ const ChatPage = () => {
     }
   }, [messages]);
 
-  const handleSubmit = async (e) => {
+  const sendMessage = (e) => {
     e.preventDefault();
     
-    if (!inputMessage.trim() || isLoading) return;
+    if (!inputMessage.trim() || isLoading || !socket) return;
 
     const userMessage = inputMessage.trim();
     setInputMessage('');
@@ -126,14 +159,10 @@ const ChatPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await sendMessage(userMessage);
-      setMessages(prev => [...prev, { text: response.message, isUser: false }]);
+      console.log("📤 메시지 전송:", userMessage);
+      socket.send(JSON.stringify({ message: userMessage }));
     } catch (error) {
-      setMessages(prev => [...prev, { 
-        text: error.message || '죄송합니다. 오류가 발생했습니다.', 
-        isUser: false,
-        isError: true 
-      }]);
+      setMessages(prev => [...prev, { text: '메시지 전송 실패', isUser: false, isError: true }]);
     } finally {
       setIsLoading(false);
     }
@@ -160,7 +189,7 @@ const ChatPage = () => {
           </LoadingDots>
         )}
       </ChatContainer>
-      <InputContainer onSubmit={handleSubmit}>
+      <InputContainer onSubmit={sendMessage}>
         <Input
           type="text"
           value={inputMessage}
@@ -176,4 +205,4 @@ const ChatPage = () => {
   );
 };
 
-export default ChatPage; 
+export default ChatPage;

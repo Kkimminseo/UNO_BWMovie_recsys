@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { signup } from '../api/auth';
+import axiosInstance from '/Users/t2023-m0060/Desktop/chat_movie/UNO_BWMovie_recsys/react-frontend/src/api/axios.js';
+
 
 const Container = styled.div`
   display: flex;
@@ -81,7 +83,7 @@ const SignupPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await signup(formData);
+      await axiosInstance.post('/account/signup/', formData);
       navigate('/login');
     } catch (error) {
       setError(error.message || '회원가입 중 오류가 발생했습니다.');
