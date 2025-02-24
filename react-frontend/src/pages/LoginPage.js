@@ -81,13 +81,32 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login(formData);
-      setIsAuthenticated(true);
-      navigate('/'); // 로그인 성공 시 메인 페이지로 이동
+      const response = await fetch("http://127.0.0.1:8000/api/v1/account/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",  // ✅ CSRF 쿠키 포함
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+      });
+  
+      const data = await response.json().catch(() => null);
+  
+      if (!data || response.status !== 200) {
+        throw new Error(data?.error || "로그인 중 오류가 발생했습니다.");
+      }
+  
+      console.log("로그인 성공:", data.message);
     } catch (error) {
-      setError(error.message || '로그인 중 오류가 발생했습니다.');
+      setError(error.message || "로그인 중 오류가 발생했습니다.");
     }
   };
+  
+  
+  
 
   return (
     <Container>

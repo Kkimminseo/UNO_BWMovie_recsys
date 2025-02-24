@@ -1,11 +1,15 @@
 # 직접 생성
 ## 가상환경
 myenv
+chat/
 ## key
 config.py
 
 ## 데이터
-Langchain/faiss_db
+Langchain/
+dataset/documents.pkl
+dataset/index.faiss
+dataset/index.pkl
 
 # MAC
 .DS_Store
