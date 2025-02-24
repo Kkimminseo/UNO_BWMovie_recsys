@@ -133,6 +133,10 @@ DATABASES = {
     }
 }
 
+"""csv file 경로 설정"""
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+CSV_FILE_PATH = os.path.join(BASE_DIR, 'dataset', 'signup_movie_list.csv')
+
 # user 모델 선언
 AUTH_USER_MODEL = "accounts.User"
 
