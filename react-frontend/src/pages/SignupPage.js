@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { signup } from '../api/auth';
 import axiosInstance from '../api/axios.js';
+import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
   display: flex;
@@ -122,6 +123,7 @@ const LoginLink = styled(Link)`
 
 const SignupPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     nickname: '',
@@ -147,10 +149,28 @@ const SignupPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // 1. 회원가입
       await signup(formData);
-      navigate('/preferences'); // 회원가입 후 선호도 선택 페이지로 이동
+      
+      // 2. 자동 로그인 수행
+      const loginData = {
+        username: formData.username,
+        password: formData.password
+      };
+      await login(loginData);
+      
+      // 3. 선호도 선택 페이지로 이동
+      navigate('/preferences');
     } catch (error) {
-      setError(error.message);
+      if (typeof error === 'string') {
+        setError(error);
+      } else if (error.non_field_errors) {
+        setError(error.non_field_errors[0]);
+      } else if (error.message) {
+        setError(error.message);
+      } else {
+        setError('회원가입 중 오류가 발생했습니다.');
+      }
     }
   };
 
