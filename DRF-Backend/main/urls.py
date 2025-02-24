@@ -17,10 +17,13 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/account/", include("accounts.urls")),  # accounts의 url 불러 쓰기
     path("api/v1/chat/", include("chats.urls")),  # chats의 url 불러 쓰기
-    path("api/v1/movie/", include("movies.urls")) # movies의 url 불러 쓰기
+    path("api/v1/movie/", include("movies.urls")), # movies의 url 불러 쓰기
+    static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
 ]

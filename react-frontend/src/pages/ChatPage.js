@@ -214,21 +214,12 @@ const ChatPage = () => {
 
   const sendMessage = (e) => {
     e.preventDefault();
-    
     if (!inputMessage.trim() || isLoading || !socket) return;
-
-    const userMessage = inputMessage.trim();
+    
+    socket.send(JSON.stringify({ message: inputMessage }));
+    setMessages(prev => [...prev, { text: inputMessage, isUser: true }]);
     setInputMessage('');
-    setMessages(prev => [...prev, { text: userMessage, isUser: true }]);
     setIsLoading(true);
-
-    try {
-      console.log("📤 메시지 전송:", userMessage);
-      socket.send(JSON.stringify({ message: userMessage }));
-    } catch (error) {
-      setMessages(prev => [...prev, { text: '메시지 전송 실패', isUser: false, isError: true }]);
-      setIsLoading(false);
-    }
   };
 
   return (
