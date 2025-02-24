@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styled from '@emotion/styled';
-import { login } from '../api/auth';
 import { useAuth } from '../contexts/AuthContext';
+import axiosInstance from '../api/axios';
 
 const Container = styled.div`
   display: flex;
@@ -133,46 +133,35 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // 에러 메시지 초기화
+    setError('');
     
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/v1/account/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
+      const response = await axiosInstance.post('/account/login/', {
+        username: formData.username,
+        password: formData.password,
       });
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
-        // 서버에서 보낸 에러 메시지 처리
-        if (data.detail) {
-          throw new Error(data.detail);
-        } else if (data.error) {
-          throw new Error(data.error);
-        } else if (typeof data === 'string') {
-          throw new Error(data);
-        } else if (data.non_field_errors) {
-          throw new Error(data.non_field_errors[0]);
-        } else {
-          throw new Error("로그인 중 오류가 발생했습니다.");
-        }
-      }
 
-      // 로그인 성공
-      localStorage.setItem('access_token', data.access);
-      localStorage.setItem('refresh_token', data.refresh);
+      const { access, refresh } = response.data;
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
       setIsAuthenticated(true);
       navigate('/');
       
     } catch (error) {
-      setError(error.message);
+      if (error.response) {
+        const data = error.response.data;
+        if (data.detail) {
+          setError(data.detail);
+        } else if (data.error) {
+          setError(data.error);
+        } else if (data.non_field_errors) {
+          setError(data.non_field_errors[0]);
+        } else {
+          setError('로그인 중 오류가 발생했습니다.');
+        }
+      } else {
+        setError('서버와 통신 중 오류가 발생했습니다.');
+      }
     }
   };
   

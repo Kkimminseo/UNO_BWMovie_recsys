@@ -6,30 +6,41 @@ import SendIcon from '@mui/icons-material/Send';
 const Container = styled.div`
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
-  height: calc(100vh - 64px);
+  padding: 0.5rem;
+  height: 85vh;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  position: fixed;
+  top: calc(50% + 32px);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  z-index: 1;
 `;
 
 const Title = styled.h1`
   color: #333;
-  margin-bottom: 2rem;
+  margin: 0;
   text-align: center;
+  font-size: 1.3rem;
+  padding: 0.5rem 0;
 `;
 
 const ChatContainer = styled.div`
   flex: 1;
+  min-height: 0;
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 0.8rem;
   overflow-y: auto;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  height: calc(70vh - 120px);
 `;
 
 const MessageBubble = styled.div`
@@ -58,7 +69,10 @@ const MessageBubble = styled.div`
 
 const InputContainer = styled.form`
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  position: relative;
+  bottom: 0;
 `;
 
 const Input = styled.input`

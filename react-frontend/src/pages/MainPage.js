@@ -1,5 +1,7 @@
 import React from 'react';
 import styled from '@emotion/styled';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -52,7 +54,61 @@ const FeatureDescription = styled.p`
   line-height: 1.5;
 `;
 
+const ActionCard = styled.div`
+  margin-top: 3rem;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+`;
+
+const ActionTitle = styled.h3`
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+`;
+
+const ActionDescription = styled.p`
+  color: #666;
+  margin-bottom: 1rem;
+`;
+
+const ActionButton = styled.button`
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
 const MainPage = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleActionClick = () => {
+    if (isAuthenticated) {
+      navigate('/chat');
+    } else {
+      navigate('/login');
+    }
+  };
+
   return (
     <Container>
       <Title>BWMovie 추천 시스템</Title>
@@ -84,6 +140,26 @@ const MainPage = () => {
           </FeatureDescription>
         </FeatureCard>
       </FeatureGrid>
+
+      <ActionCard onClick={handleActionClick}>
+        {isAuthenticated ? (
+          <>
+            <ActionTitle>AI 채팅으로 영화 추천받기</ActionTitle>
+            <ActionDescription>
+              AI와 대화하면서 당신의 취향에 맞는 영화를 추천받아보세요.
+            </ActionDescription>
+            <ActionButton>채팅 시작하기</ActionButton>
+          </>
+        ) : (
+          <>
+            <ActionTitle>로그인하고 시작하기</ActionTitle>
+            <ActionDescription>
+              로그인하여 개인화된 영화 추천 서비스를 경험해보세요.
+            </ActionDescription>
+            <ActionButton>로그인하기</ActionButton>
+          </>
+        )}
+      </ActionCard>
     </Container>
   );
 };

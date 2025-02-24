@@ -71,7 +71,7 @@ const Navbar = () => {
     try {
       await logout();
       setIsAuthenticated(false);
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error('로그아웃 중 오류가 발생했습니다:', error);
     }
