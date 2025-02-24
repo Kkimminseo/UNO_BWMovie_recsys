@@ -15,9 +15,9 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # ElevenLabs API Key
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-ELEVENLABS_API_KEY = os.getenv('ELEVENLABS_API_KEY')
-print(f'{ELEVENLABS_API_KEY}')
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
+print(f"{ELEVENLABS_API_KEY}")
 
 # Voice IDs (각 인물별)
 ANSUNGJAE_VOICE_ID = "rTsJeYsqsSoHL7m9QbIV"
@@ -29,12 +29,13 @@ vectorstore = FAISS.load_local(
     folder_path="../dataset/",
     index_name="index",
     embeddings=embeddings,
-    allow_dangerous_deserialization=True
+    allow_dangerous_deserialization=True,
 )
 db = vectorstore
 
 # LLM 모델 설정
 llm = ChatOpenAI(model="gpt-4o")
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -54,34 +55,52 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         # 벡터 검색 및 GPT 호출
-        response = await self.get_movie_recommendation(question, preferred_genres, preferred_movies)
+        response = await self.get_movie_recommendation(
+            question, preferred_genres, preferred_movies
+        )
 
         # 음성 변환 실행
-        ansungjae_audio = await self.text_to_speech(response["ansungjae"], ANSUNGJAE_VOICE_ID)
-        paikjongwon_audio = await self.text_to_speech(response["paikjongwon"], PAIKJONGWON_VOICE_ID)
+        ansungjae_audio = await self.text_to_speech(
+            response["ansungjae"], ANSUNGJAE_VOICE_ID
+        )
+        paikjongwon_audio = await self.text_to_speech(
+            response["paikjongwon"], PAIKJONGWON_VOICE_ID
+        )
 
         # 결과 전송
-        await self.send(text_data=json.dumps({
-            "ansungjae_text": response["ansungjae"],
-            "paikjongwon_text": response["paikjongwon"],
-            "ansungjae_audio": ansungjae_audio,
-            "paikjongwon_audio": paikjongwon_audio
-        }))
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "ansungjae_text": response["ansungjae"],
+                    "paikjongwon_text": response["paikjongwon"],
+                    "ansungjae_audio": ansungjae_audio,
+                    "paikjongwon_audio": paikjongwon_audio,
+                }
+            )
+        )
 
     async def genre_weighted_mmr_search(self, query, preferred_genre, k=20):
         retriever = db.as_retriever(
-            search_type="mmr",
-            search_kwargs={"k": k, "fetch_k": 10, "lambda_mult": 0.1}
+            search_type="mmr", search_kwargs={"k": k, "fetch_k": 10, "lambda_mult": 0.1}
         )
-        
+
         preferred_count = int(k * 0.6)
         general_count = k - preferred_count
 
         preferred_filter = {"genre": {"$eq": preferred_genre}}
-        
-        preferred_docs = await asyncio.to_thread(retriever.get_relevant_documents, query, filter=preferred_filter, k=preferred_count)
-        all_docs = await asyncio.to_thread(retriever.get_relevant_documents, query, k=general_count + 10)
-        general_docs = [doc for doc in all_docs if doc.metadata.get("genre") != preferred_genre][:general_count]
+
+        preferred_docs = await asyncio.to_thread(
+            retriever.get_relevant_documents,
+            query,
+            filter=preferred_filter,
+            k=preferred_count,
+        )
+        all_docs = await asyncio.to_thread(
+            retriever.get_relevant_documents, query, k=general_count + 10
+        )
+        general_docs = [
+            doc for doc in all_docs if doc.metadata.get("genre") != preferred_genre
+        ][:general_count]
 
         return preferred_docs + general_docs
 
@@ -89,7 +108,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         retrieved_docs = await self.genre_weighted_mmr_search(query, preferred_genres)
         formatted_context = "\n\n".join(doc.page_content for doc in retrieved_docs)
 
-        prompt = ChatPromptTemplate.from_template("""
+        prompt = ChatPromptTemplate.from_template(
+            """
 넌 영화를 추천하는 AI야. 너는 안성재 셰프와 백종원 사업가 2명의 입장에서 각각 1개의 영화를 추천해야해.
 입력받은 {preferred_genres}, {preferred_movies}와 유사한 영화를 추천해줘. 단, 아예 똑같은 영화는 추천하지 말아줘.
 먼저, 안성재 셰프는 다양성이 높은 예술적인 영화를 좋아하는 성격이야.
@@ -125,22 +145,31 @@ fewshot:
 {preferred_movies}
 {context}
 질문:
-{question} """)
+{question} """
+        )
 
-        response = await asyncio.to_thread(llm.invoke, prompt.format(
-            context=formatted_context,
-            question=query,
-            preferred_genres=preferred_genres,
-            preferred_movies=preferred_movies
-        ))
+        response = await asyncio.to_thread(
+            llm.invoke,
+            prompt.format(
+                context=formatted_context,
+                question=query,
+                preferred_genres=preferred_genres,
+                preferred_movies=preferred_movies,
+            ),
+        )
 
         response_text = response.content
 
         try:
             an_response = response_text.split("백종원 사업가:")[0].strip()
-            paik_response = "백종원 사업가:" + response_text.split("백종원 사업가:")[1].strip()
+            paik_response = (
+                "백종원 사업가:" + response_text.split("백종원 사업가:")[1].strip()
+            )
         except IndexError:
-            an_response, paik_response = response_text, "추천 결과를 생성할 수 없습니다."
+            an_response, paik_response = (
+                response_text,
+                "추천 결과를 생성할 수 없습니다.",
+            )
 
         return {"ansungjae": an_response, "paikjongwon": paik_response}
 
@@ -155,10 +184,7 @@ fewshot:
             return None
 
         url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
-        headers = {
-            "xi-api-key": ELEVENLABS_API_KEY,
-            "Content-Type": "application/json"
-        }
+        headers = {"xi-api-key": ELEVENLABS_API_KEY, "Content-Type": "application/json"}
         data = {
             "text": text,
             "model_id": "eleven_multilingual_v2",
@@ -166,27 +192,30 @@ fewshot:
                 "stability": 0.5,
                 "similarity_boost": 1,
                 "style": 0.8,
-                "use_speaker_boost": True
-            }
+                "use_speaker_boost": True,
+            },
         }
 
         try:
-            response = await asyncio.to_thread(requests.post, url, json=data, headers=headers)
+            response = await asyncio.to_thread(
+                requests.post, url, json=data, headers=headers
+            )
             response.raise_for_status()
 
             audio_content = response.content
             audio_filename = f"tts_output_{voice_id}.mp3"
-            audio_url = f"/media/{audio_filename}"
+            media_path = os.path.join(settings.MEDIA_ROOT, audio_filename)
 
-            await self.send(text_data=json.dumps({
-                "type": "audio",
-                "audio_url": audio_url
-            }))
-            with open(audio_filename, "wb") as f:
+            # media 디렉토리가 없으면 생성
+            os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+
+            with open(media_path, "wb") as f:
                 f.write(audio_content)
 
-            print(f'생성된 오디오 파일 : {audio_filename}')
-            return audio_filename
+            # URL 경로 수정
+            audio_url = f"{settings.MEDIA_URL}{audio_filename}".replace("//", "/")
+            print(f"생성된 오디오 파일 : {audio_url}")
+            return audio_url
         except requests.exceptions.RequestException as e:
             logger.error(f"❌ ElevenLabs API 호출 오류: {str(e)}")
             return None

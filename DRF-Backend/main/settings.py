@@ -18,8 +18,8 @@ import openai
 
 # .env 파일 로드
 load_dotenv()
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-ELEVENLABS_API_KEY = os.getenv('ELEVENLABS_API_KEY')
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -44,8 +44,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
-    'channels',
+    "daphne",
+    "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     "accounts",  # 회원 기능 app
     "chats",  # 채팅 기능 app
     "movies",  # 영화 정보 app
-    "corsheaders", # CORS 설정
+    "corsheaders",  # CORS 설정
 ]
 
 # Rest Framework 설정하기
@@ -100,7 +100,7 @@ ROOT_URLCONF = "main.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / '../react-frontend/public'],
+        "DIRS": [BASE_DIR / "../react-frontend/public"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -114,14 +114,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "main.wsgi.application"
-ASGI_APPLICATION = 'main.asgi.application'
+ASGI_APPLICATION = "main.asgi.application"
 
 CHANNEL_LAYERS = {
-    'default' : {
-        'BACKEND' : 'channels_redis.core.RedisChannelLayer',
-        'CONFIG' : {
-            'hosts' : [('127.0.0.1', 6379)]
-        }
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [("127.0.0.1", 6379)]},
     }
 }
 # Database
@@ -136,7 +134,7 @@ DATABASES = {
 
 """csv file 경로 설정"""
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-CSV_FILE_PATH = os.path.join(BASE_DIR, 'dataset', 'signup_movie_list.csv')
+CSV_FILE_PATH = os.path.join(BASE_DIR, "dataset", "signup_movie_list.csv")
 
 # user 모델 선언
 AUTH_USER_MODEL = "accounts.User"
@@ -176,8 +174,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+# 미디어 파일 설정
+MEDIA_URL = "media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
