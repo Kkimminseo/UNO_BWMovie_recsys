@@ -6,7 +6,7 @@
  $ npm install axios react-router-dom react-toastify @emotion/react @emotion/styled @mui/icons-material</code>
 <hr>
 <h2>📺 메인 화면</h2>
-<img scr="https://github.com/user-attachments/assets/c037a20a-462f-495e-b354-e6a1f4210b76">
+<img src="https://github.com/user-attachments/assets/8aff9e9b-5d4d-4f56-9d6c-b459ee27a0d6">
 <hr>
 <h2>📺 로그인 화면</h2>
 <img src="https://github.com/user-attachments/assets/c6fe7d0c-5e23-4c3b-9cc7-056036e37f69">
@@ -22,10 +22,10 @@
 <img src="https://github.com/user-attachments/assets/2f505001-2c18-43af-9c29-90b5d25be80f">
 <hr>
 <h2>📺 회원가입 완료 후, 이어지는 영화 고르는 화면</h2>
-<img scr="https://github.com/user-attachments/assets/b8b639ce-1c97-4578-82d2-54160c340ec9">
-<img scr="https://github.com/user-attachments/assets/868b0ad4-61b9-444f-b9e7-cacb0d0a9897">
+<img src="https://github.com/user-attachments/assets/d7a8b7e9-18ef-4ac2-a16a-6545f52bf572">
+<img src="https://github.com/user-attachments/assets/90bd1624-8767-4be9-9829-345078bf88e1">
 <br><br>
-<il> - 영화가 선택되었을 때 보여지는 모습입니다.</il>
+<il> - 아래의 사진은 영화가 선택되었을 때 보여지는 모습입니다.</il>
 <hr>
 <h2>📺 AI 채팅 화면</h2>
 <img src="https://github.com/user-attachments/assets/91a37cc1-4046-4d9c-99d1-dd749090b193">
