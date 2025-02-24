@@ -26,7 +26,7 @@ class SignUpMovieListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-"""선호하는 영화 저장하기"""
+"""선호하는 영화 및 장르 저장하기"""
 class CreateMoviePreferenceView(APIView):
     permission_classes = [permissions.IsAuthenticated] # 인증된 사용자만
 
@@ -67,7 +67,7 @@ class CreateMoviePreferenceView(APIView):
                 return Response({"error": f"ID '{movie_id}'에 해당하는 영화가 존재하지 않습니다."},
                                 status=status.HTTP_400_BAD_REQUEST)
         
-        # 영화 저장이 완료되면 저장된 영화리스트에서 장르목록을 추출하여 장르 선호도 데이터베이스에 저장
+        """영화 저장이 완료되면 저장된 영화 리스트에서 장르 목록을 추출하여 장르 선호도 데이터베이스에 저장"""
         movies = Movie.objects.filter(pk__in=selected_movie_ids)
         all_genres = {
             genre.strip() for movie in movies for genre in movie.genres.split(",")}
