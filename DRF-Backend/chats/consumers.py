@@ -3,6 +3,7 @@ import json
 import asyncio
 import requests
 import logging
+from openai import OpenAI
 from dotenv import load_dotenv
 from django.conf import settings
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -98,40 +99,66 @@ class ChatConsumer(AsyncWebsocketConsumer):
         pass
 
     async def receive(self, text_data):
-        data = json.loads(text_data)
-        question = data.get("message", "")
-
-        # 사용자의 선호도 정보 조회
-        preferred_genres, preferred_movies = await self.get_user_preferences()
-
-        if not question:
-            await self.send(text_data=json.dumps({"error": "질문이 없습니다."}))
-            return
-
-        # 벡터 검색 및 GPT 호출
-        response = await self.get_movie_recommendation(
-            question, preferred_genres, preferred_movies
-        )
-
-        # 음성 변환 실행
-        ansungjae_audio = await self.text_to_speech(
-            response["ansungjae"], ANSUNGJAE_VOICE_ID
-        )
-        paikjongwon_audio = await self.text_to_speech(
-            response["paikjongwon"], PAIKJONGWON_VOICE_ID
-        )
-
-        # 결과 전송
-        await self.send(
-            text_data=json.dumps(
-                {
-                    "ansungjae_text": response["ansungjae"],
-                    "paikjongwon_text": response["paikjongwon"],
-                    "ansungjae_audio": ansungjae_audio,
-                    "paikjongwon_audio": paikjongwon_audio,
-                }
+        try:
+            data = json.loads(text_data)
+            question = data.get("message", "")
+            
+            # query 변수 오류 수정
+            client = OpenAI()
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "너는 사회적으로 부적절한 질문인지 판단하는 AI야."},
+                    {"role": "user", "content": f"다음 질문이 사회적으로 부적절한지 판단해서 'yes' or 'no'로만 답해줘\n{question}"}  # query -> question
+                ]
             )
-        )
+            answer = response.choices[0].message.content.strip().lower()
+            
+            if answer == 'yes':
+                await self.send(text_data=json.dumps({
+                    "type": "chat.message", 
+                    "response": "부적절한 메시지입니다. 다시 입력해주세요."
+                }))
+                return
+
+            # 사용자의 선호도 정보 조회
+            preferred_genres, preferred_movies = await self.get_user_preferences()
+
+            if not question:
+                await self.send(text_data=json.dumps({"error": "질문이 없습니다."}))
+                return
+
+            # 벡터 검색 및 GPT 호출
+            response = await self.get_movie_recommendation(
+                question, preferred_genres, preferred_movies
+            )
+
+            # 음성 변환 실행
+            ansungjae_audio = await self.text_to_speech(
+                response["ansungjae"], ANSUNGJAE_VOICE_ID
+            )
+            paikjongwon_audio = await self.text_to_speech(
+                response["paikjongwon"], PAIKJONGWON_VOICE_ID
+            )
+
+            # 결과 전송
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "ansungjae_text": response["ansungjae"],
+                        "paikjongwon_text": response["paikjongwon"],
+                        "ansungjae_audio": ansungjae_audio,
+                        "paikjongwon_audio": paikjongwon_audio,
+                    }
+                )
+            )
+        
+        except Exception as e:
+            logger.error(f"메시지 처리 중 예외 발생: {e}")
+            await self.send(text_data=json.dumps({
+                "type": "chat.message",
+                "response": "오류가 발생했습니다. 다시 시도해주세요."
+            }))
 
     async def genre_weighted_mmr_search(self, query, preferred_genre, k=20):
         retriever = db.as_retriever(

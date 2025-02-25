@@ -217,6 +217,20 @@ const ChatPage = () => {
       try {
         const data = JSON.parse(event.data);
         
+        // 부적절한 메시지 응답 처리
+        if (data.type === "chat.message" && data.response === "부적절한 메시지입니다. 다시 입력해주세요.") {
+          setMessages((prev) => [
+            ...prev,
+            {
+              text: data.response,
+              isUser: false,
+              isError: true
+            }
+          ]);
+          setIsLoading(false);
+          return;
+        }
+        
         // 오디오 URL에 백엔드 서버 URL 추가 및 경로 정규화
         const normalizeAudioUrl = (url) => {
           if (!url) return null;
