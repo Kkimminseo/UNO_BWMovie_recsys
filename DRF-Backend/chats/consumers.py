@@ -34,7 +34,7 @@ PAIKJONGWON_VOICE_ID = "zPEmr71Vsf4rNSF8d2Fs"
 # FAISS 벡터 DB 로드
 embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
 vectorstore = FAISS.load_local(
-    folder_path="../dataset/",
+    folder_path="../dataset/faiss",
     index_name="index",
     embeddings=embeddings,
     allow_dangerous_deserialization=True,
@@ -102,23 +102,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             data = json.loads(text_data)
             question = data.get("message", "")
-            
+
             # query 변수 오류 수정
             client = OpenAI()
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "너는 사회적으로 부적절한 질문인지 판단하는 AI야."},
-                    {"role": "user", "content": f"다음 질문이 사회적으로 부적절한지 판단해서 'yes' or 'no'로만 답해줘\n{question}"}  # query -> question
-                ]
+                    {
+                        "role": "system",
+                        "content": "너는 사회적으로 부적절한 질문인지 판단하는 AI야.",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"다음 질문이 사회적으로 부적절한지 판단해서 'yes' or 'no'로만 답해줘\n{question}",
+                    },  # query -> question
+                ],
             )
             answer = response.choices[0].message.content.strip().lower()
-            
-            if answer == 'yes':
-                await self.send(text_data=json.dumps({
-                    "type": "chat.message", 
-                    "response": "부적절한 메시지입니다. 다시 입력해주세요."
-                }))
+
+            if answer == "yes":
+                await self.send(
+                    text_data=json.dumps(
+                        {
+                            "type": "chat.message",
+                            "response": "부적절한 메시지입니다. 다시 입력해주세요.",
+                        }
+                    )
+                )
                 return
 
             # 사용자의 선호도 정보 조회
@@ -152,13 +162,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     }
                 )
             )
-        
+
         except Exception as e:
             logger.error(f"메시지 처리 중 예외 발생: {e}")
-            await self.send(text_data=json.dumps({
-                "type": "chat.message",
-                "response": "오류가 발생했습니다. 다시 시도해주세요."
-            }))
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "type": "chat.message",
+                        "response": "오류가 발생했습니다. 다시 시도해주세요.",
+                    }
+                )
+            )
 
     async def genre_weighted_mmr_search(self, query, preferred_genre, k=20):
         retriever = db.as_retriever(

@@ -5,15 +5,17 @@ chat/
 ## key
 config.py
 
+# redis
+*.rdb
+
 ## 데이터
 Langchain/
-dataset/documents.pkl
-dataset/index.faiss
-dataset/index.pkl
-
+dataset/faiss/
 # MAC
 .DS_Store
 
+# node_modules
+/node_modules
 
 # Created by https://www.toptal.com/developers/gitignore/api/django
 # Edit at https://www.toptal.com/developers/gitignore?templates=django
