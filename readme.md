@@ -1,13 +1,24 @@
 <h1>🎬 BW Movie 추천 🍿</h1>
 <img src="https://github.com/user-attachments/assets/e97b6231-d311-499c-a6d2-d431dcca4418" width="1200" height="400"/>
 <br><br>
-<li> 안성재 셰프, 백종원 사업가의 목소리로 추천받는 영화 AI 채팅 서비스 </li>
+<h3> 안성재 셰프, 백종원 사업가의 목소리로 추천받는 영화 AI 채팅 서비스 </h3>
 <hr>
-<h1>👀 Front를 위해서 아래의 항목들을 설치해주세요.</h1>
+<h1>⚙️ Front를 위해서 아래의 항목들을 설치해주세요.</h1>
 <code>$ cd react-frontend
- $ npm install axios react-router-dom react-toastify @emotion/react @emotion/styled @mui/icons-material</code>
-<br><br>
-<h1>👀 사용된 핵심 기술</h1>
+ $ npm install axios react-router-dom react-toastify @emotion/react @emotion/styled @mui/icons-material</code><br>
+ <h1>⚙️ Back을 위해서 아래의 항목들을 설치해주세요.</h1>
+<code>$ pip install -r requirments.txt
+ $ dataset/faiss/documents.pkl
+ $ dataset/faiss/index.faiss
+ $ dataset/faiss/index.pkl
+</code>
+<h1>⚙️ 서버 시작을 위해서 터미널에 입력해주세요.</h1>
+<code>DRF-Backend/ : $ redis-server
+DRF-Backend/ : $ daphne -b 0.0.0.0 -p 8000 main.asgi:application
+react-frontend/ : $ npm start
+</code>
+ <hr>
+<h1>⚙️ 사용된 핵심 기술</h1>
 <blockquote><strong>LLM</strong></blockquote>
 <il>1. GPT 4o</il><br>
 <il>2. 11ElevenLabs</il><br><br>
