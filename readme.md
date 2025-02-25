@@ -1,9 +1,22 @@
 <h1>🎬 BW Movie 추천 🍿</h1>
 <img src="https://github.com/user-attachments/assets/e97b6231-d311-499c-a6d2-d431dcca4418" width="1200" height="400"/>
 <br><br>
+<li> 안성재 셰프, 백종원 사업가의 목소리로 추천받는 영화 AI 채팅 서비스 </li>
+<hr>
 <h1>👀 Front를 위해서 아래의 항목들을 설치해주세요.</h1>
 <code>$ cd react-frontend
  $ npm install axios react-router-dom react-toastify @emotion/react @emotion/styled @mui/icons-material</code>
+<br><br>
+<h1>👀 사용된 핵심 기술</h1>
+<blockquote><strong>LLM</strong></blockquote>
+<il>1. GPT 4o</il><br>
+<il>2. 11ElevenLabs</il><br><br>
+<blockquote><strong>Backend</strong></blockquote>
+<il>1. redis</il><br>
+<il>2. django REST Framework</il><br>
+<il>3. django Channels</il><br><br>
+<blockquote><strong>Frontend</strong></blockquote>
+<il>1. React-JS</il><br>
 <hr>
 <h2>📺 메인 화면</h2>
 <img src="https://github.com/user-attachments/assets/8aff9e9b-5d4d-4f56-9d6c-b459ee27a0d6">
@@ -31,4 +44,4 @@
 <img src="https://github.com/user-attachments/assets/91a37cc1-4046-4d9c-99d1-dd749090b193">
 <hr>
 <h2>📺 물음에 대한 답변 화면</h2>
-<img src="https://github.com/user-attachments/assets/8918ad77-0619-4fed-aec4-9fbdc4375b8f">
+<img src="https://github.com/user-attachments/assets/5596e61a-0d0b-4997-9a1c-6bd1c12f3850">
