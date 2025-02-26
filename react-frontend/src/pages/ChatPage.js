@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import SendIcon from '@mui/icons-material/Send';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import { getAccessToken } from '../api/auth';  // 인증 토큰 가져오기
 
 const Container = styled.div`
   max-width: 800px;
@@ -157,22 +160,53 @@ const Spinner = styled.div`
   }
 `;
 
+const AudioPlayer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
+const AudioButton = styled.button`
+  background: none;
+  border: none;
+  color: ${props => props.isUser ? '#fff' : '#1a73e8'};
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+`;
+
 const ChatPage = () => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [playingAudio, setPlayingAudio] = useState(null);
   const chatContainerRef = useRef(null);
   const [socket, setSocket] = useState(null);
+  const audioRefs = useRef({});
+  const BACKEND_URL = 'http://localhost:8000';
 
   useEffect(() => {
-    // 초기 안내 메시지 추가
     setMessages([{
       text: "안녕하세요! 어떤영화를 추천해드릴까요?",
       isUser: false
     }]);
 
+    const accessToken = getAccessToken();
+    if (!accessToken) {
+      console.error("❌ 인증 토큰이 없습니다.");
+      return;
+    }
+
     console.log("🔍 WebSocket 연결 시도...");
-    const ws = new WebSocket("ws://localhost:8000/ws/chat/");
+    const ws = new WebSocket(`ws://localhost:8000/ws/chat/?token=${accessToken}`);
 
     ws.onopen = () => {
       console.log("✅ WebSocket 연결 성공!");
@@ -182,7 +216,48 @@ const ChatPage = () => {
       console.log("📩 받은 메시지:", event.data);
       try {
         const data = JSON.parse(event.data);
-        setMessages((prev) => [...prev, { text: data.response, isUser: false }]);
+        
+        // 부적절한 메시지 응답 처리
+        if (data.type === "chat.message" && data.response === "부적절한 메시지입니다. 다시 입력해주세요.") {
+          setMessages((prev) => [
+            ...prev,
+            {
+              text: data.response,
+              isUser: false,
+              isError: true
+            }
+          ]);
+          setIsLoading(false);
+          return;
+        }
+        
+        // 오디오 URL에 백엔드 서버 URL 추가 및 경로 정규화
+        const normalizeAudioUrl = (url) => {
+          if (!url) return null;
+          return `${BACKEND_URL}/${url}`.replace(/([^:]\/)\/+/g, "$1");
+        };
+
+        const ansungjaeAudioUrl = normalizeAudioUrl(data.ansungjae_audio);
+        const paikjongwonAudioUrl = normalizeAudioUrl(data.paikjongwon_audio);
+
+        console.log("🎵 안성재 오디오 URL:", ansungjaeAudioUrl);
+        console.log("🎵 백종원 오디오 URL:", paikjongwonAudioUrl);
+
+        setMessages((prev) => [
+          ...prev, 
+          { 
+            text: data.ansungjae_text,
+            isUser: false,
+            audioUrl: ansungjaeAudioUrl,
+            speaker: '안성재'
+          },
+          {
+            text: data.paikjongwon_text,
+            isUser: false,
+            audioUrl: paikjongwonAudioUrl,
+            speaker: '백종원'
+          }
+        ]);
         setIsLoading(false);
       } catch (error) {
         console.error("❌ WebSocket 메시지 JSON 파싱 오류:", error);
@@ -212,23 +287,51 @@ const ChatPage = () => {
     }
   }, [messages]);
 
+  const handleAudioPlay = (audioUrl, messageId) => {
+    if (playingAudio === messageId) {
+      audioRefs.current[messageId].pause();
+      setPlayingAudio(null);
+    } else {
+      // 현재 재생 중인 오디오가 있다면 중지
+      if (playingAudio && audioRefs.current[playingAudio]) {
+        audioRefs.current[playingAudio].pause();
+      }
+
+      // 새 오디오 재생
+      if (!audioRefs.current[messageId]) {
+        console.log("🎵 오디오 URL:", audioUrl); // 디버깅을 위한 로그 추가
+        audioRefs.current[messageId] = new Audio(audioUrl);
+        audioRefs.current[messageId].onended = () => setPlayingAudio(null);
+        audioRefs.current[messageId].onerror = (e) => {
+          console.error("🚫 오디오 로드 오류:", e);
+        };
+      }
+      
+      const playPromise = audioRefs.current[messageId].play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setPlayingAudio(messageId);
+          })
+          .catch(error => {
+            console.error("🚫 오디오 재생 오류:", error);
+          });
+      }
+    }
+  };
+
   const sendMessage = (e) => {
     e.preventDefault();
-    
     if (!inputMessage.trim() || isLoading || !socket) return;
-
-    const userMessage = inputMessage.trim();
+    
+    const messageData = {
+      message: inputMessage,
+    };
+    
+    socket.send(JSON.stringify(messageData));
+    setMessages(prev => [...prev, { text: inputMessage, isUser: true }]);
     setInputMessage('');
-    setMessages(prev => [...prev, { text: userMessage, isUser: true }]);
     setIsLoading(true);
-
-    try {
-      console.log("📤 메시지 전송:", userMessage);
-      socket.send(JSON.stringify({ message: userMessage }));
-    } catch (error) {
-      setMessages(prev => [...prev, { text: '메시지 전송 실패', isUser: false, isError: true }]);
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -245,6 +348,19 @@ const ChatPage = () => {
               {!message.isUser && <SmartToyIcon style={{ color: '#1a73e8' }} />}
               <span>{message.text}</span>
             </div>
+            {message.audioUrl && (
+              <AudioPlayer>
+                <AudioButton
+                  onClick={() => handleAudioPlay(message.audioUrl, index)}
+                  isUser={message.isUser}
+                >
+                  {playingAudio === index ? <PauseIcon /> : <PlayArrowIcon />}
+                </AudioButton>
+                <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                  {message.speaker} 음성 듣기
+                </span>
+              </AudioPlayer>
+            )}
             <div className="message-time">
               {new Date().toLocaleTimeString('ko-KR', { 
                 hour: '2-digit', 

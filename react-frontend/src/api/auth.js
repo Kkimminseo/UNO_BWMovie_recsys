@@ -35,4 +35,9 @@ export const logout = async () => {
   } catch (error) {
     throw error.response.data;
   }
+};
+
+// 액세스 토큰 가져오기
+export const getAccessToken = () => {
+  return localStorage.getItem('access_token');
 }; 
