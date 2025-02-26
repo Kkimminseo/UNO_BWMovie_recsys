@@ -42,7 +42,7 @@ vectorstore = FAISS.load_local(
 db = vectorstore
 
 # LLM 모델 설정
-llm = ChatOpenAI(model="gpt-4o")
+llm = ChatOpenAI(model="o1-mini")
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
